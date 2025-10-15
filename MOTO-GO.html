@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>摩托Go - 摩托车租赁平台</title>
+    <!-- 引入外部资源 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+
+    <!-- 配置Tailwind -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#E63946',
+                        secondary: '#1D3557',
+                        accent: '#F1FAEE',
+                        neutral: '#A8DADC',
+                        highlight: '#457B9D'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    <!-- 自定义工具类 -->
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+
+            .card-hover {
+                @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+            }
+
+            .btn-primary {
+                @apply bg-primary text-white px-6 py-2 rounded-lg font-medium transition-all duration-200 hover:bg-primary/90 active:bg-primary/80;
+            }
+
+            .btn-secondary {
+                @apply bg-white text-secondary border border-gray-200 px-6 py-2 rounded-lg font-medium transition-all duration-200 hover:bg-gray-50;
+            }
+
+            .input-field {
+                @apply w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all;
+            }
+
+            .section-padding {
+                @apply py-16 md:py-24;
+            }
+
+            .badge {
+                @apply px-3 py-1 rounded-full text-xs font-medium;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800">
+    <!-- 导航栏 -->
+    <header id="navbar" class="fixed w-full top-0 z-50 transition-all duration-300 bg-white/95 shadow-sm">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between h-16 md:h-20">
+                <!-- 品牌标识 -->
+                <a href="#" class="flex items-center gap-2">
+                    <div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-white">
+                        <i class="fa fa-motorcycle text-xl"></i>
+                    </div>
+                    <span class="text-xl font-bold text-secondary">摩托Go</span>
+                </a>
+
+                <!-- 导航链接 - 桌面版 -->
+                <nav class="hidden md:flex items-center gap-8">
+                    <a href="#home" class="font-medium hover:text-primary transition-colors">首页</a>
+                    <a href="#vehicles" class="font-medium hover:text-primary transition-colors">车辆列表</a>
+                    <a href="#locations" class="font-medium hover:text-primary transition-colors">取车点</a>
+                    <a href="#about" class="font-medium hover:text-primary transition-colors">关于我们</a>
+                    <a href="#faq" class="font-medium hover:text-primary transition-colors">常见问题</a>
+                </nav>
+
+                <!-- 用户操作 -->
+                <div class="flex items-center gap-4">
+                    <a href="#login" class="hidden md:block font-medium hover:text-primary transition-colors">登录</a>
+                    <a href="#register" class="hidden md:block btn-primary">注册</a>
+
+                    <!-- 移动端菜单按钮 -->
+                    <button id="mobile-menu-btn" class="md:hidden text-gray-700 focus:outline-none">
+                        <i class="fa fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 移动端菜单 -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t">
+            <div class="container mx-auto px-4 py-3 space-y-3">
+                <a href="#home" class="block py-2 font-medium hover:text-primary transition-colors">首页</a>
+                <a href="#vehicles" class="block py-2 font-medium hover:text-primary transition-colors">车辆列表</a>
+                <a href="#locations" class="block py-2 font-medium hover:text-primary transition-colors">取车点</a>
+                <a href="#about" class="block py-2 font-medium hover:text-primary transition-colors">关于我们</a>
+                <a href="#faq" class="block py-2 font-medium hover:text-primary transition-colors">常见问题</a>
+                <div class="flex gap-3 pt-2 border-t">
+                    <a href="#login" class="flex-1 text-center py-2 font-medium border border-gray-200 rounded-lg">登录</a>
+                    <a href="#register" class="flex-1 text-center py-2 font-medium bg-primary text-white rounded-lg">注册</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- 英雄区域 -->
+        <section id="home" class="pt-24 md:pt-32 pb-16 md:pb-24 bg-gradient-to-br from-secondary to-highlight text-white">
+            <div class="container mx-auto px-4">
+                <div class="flex flex-col md:flex-row items-center">
+                    <div class="md:w-1/2 mb-10 md:mb-0">
+                        <h1 class="text-[clamp(2rem,5vw,3.5rem)] font-bold leading-tight mb-4">
+                            释放骑行激情<br>
+                            <span class="text-neutral">探索城市每一个角落</span>
+                        </h1>
+                        <p class="text-lg md:text-xl opacity-90 mb-8 max-w-lg">
+                            提供各种型号摩托车租赁服务，轻松预订，灵活取还，让您的出行更加自由便捷。
+                        </p>
+
+                        <!-- 预订搜索框 -->
+                        <div class="bg-white rounded-xl p-4 shadow-lg text-gray-800 max-w-lg">
+                            <h3 class="font-semibold text-lg mb-4">快速预订</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-600 mb-1">取车日期</label>
+                                    <div class="relative">
+                                        <input type="date" class="input-field" value="2025-09-26">
+                                        <i class="fa fa-calendar absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-600 mb-1">还车日期</label>
+                                    <div class="relative">
+                                        <input type="date" class="input-field" value="2025-09-26">
+                                        <i class="fa fa-calendar absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                    </div>
+                                </div>
+                                <div class="flex items-end">
+                                    <button class="w-full btn-primary">
+                                        <i class="fa fa-search"></i> 搜索车辆
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="md:w-1/2 relative">
+                        <img src="https://github.com/zs1910115725-pixel/MOTO-GO-Pictures/raw/main/moto-small.jpg" alt="摩托车展示" class="rounded-xl shadow-2xl w-full max-w-lg mx-auto transform rotate-2 hover:rotate-0 transition-transform duration-500">                        
+                        <div class="absolute -bottom-5 -left-5 bg-primary text-white p-4 rounded-lg shadow-lg hidden md:block">
+                            <p class="text-sm font-medium">新用户专享</p>
+                            <p class="text-2xl font-bold">首单8折</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 特色服务 -->
+        <section class="py-16 bg-white">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-12">
+                    <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-secondary mb-4">我们的服务特色</h2>
+                    <p class="text-gray-600 max-w-2xl mx-auto">提供专业、安全、便捷的摩托车租赁服务，让您的每一次骑行都充满乐趣</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="bg-accent rounded-xl p-6 text-center card-hover">
+                        <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fa fa-shield text-2xl text-primary"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">安全保障</h3>
+                        <p class="text-gray-600">每辆车都经过严格检查和定期维护，提供全面保险，确保您的骑行安全。</p>
+                    </div>
+
+                    <div class="bg-accent rounded-xl p-6 text-center card-hover">
+                        <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fa fa-bolt text-2xl text-primary"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">便捷取还</h3>
+                        <p class="text-gray-600">多个取车点覆盖全城，支持线上预订，到店即取，让您的出行更加高效。</p>
+                    </div>
+
+                    <div class="bg-accent rounded-xl p-6 text-center card-hover">
+                        <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fa fa-th-large text-2xl text-primary"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">车型丰富</h3>
+                        <p class="text-gray-600">从街车到巡航，从踏板到越野，从跑车到旅行车，多种车型满足您的不同需求和骑行风格。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 热门车型 -->
+        <section id="vehicles" class="section-padding bg-gray-50">
+            <div class="container mx-auto px-4">
+                <div class="flex flex-col md:flex-row md:items-end justify-between mb-12">
+                    <div>
+                        <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-secondary mb-4">热门车型</h2>
+                        <p class="text-gray-600 max-w-2xl">精选热门摩托车，满足您的不同骑行需求</p>
+                    </div>
+
+                    <!-- 筛选器 -->
+                    <div class="flex flex-wrap gap-3 mt-4 md:mt-0">
+                        <select class="input-field max-w-[150px]">
+                            <option>所有车型</option>
+                            <option>街车</option>
+                            <option>巡航车</option>
+                            <option>踏板车</option>
+                            <option>越野车</option>
+                            <option>跑车</option>
+                            <option>旅行车</option>
+                        </select>
+                        <select class="input-field max-w-[150px]">
+                            <option>价格排序</option>
+                            <option>从低到高</option>
+                            <option>从高到低</option>
+                        </select>
+                        <select class="input-field max-w-[150px]">
+                            <option>排量</option>
+                            <option>125cc以下</option>
+                            <option>125-250cc</option>
+                            <option>250-500cc</option>
+                            <option>500cc以上</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 车辆列表 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- 车辆卡片 1 -->
+                    <div class="bg-white rounded-xl overflow-hidden shadow-sm card-hover">
+                        <div class="relative">
+                            <img src="https://github.com/zs1910115725-pixel/MOTO-GO-Pictures/raw/main/cfmoto450%202024.jpg" alt="春风450SR 2024款标准版" class="w-full h-56 object-cover">                            <div class="absolute top-4 left-4 badge bg-primary text-white">热门</div>
+                            <button class="collect-btn absolute top-4 right-4 w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center text-gray-600 hover:text-primary transition-colors">
+                                <i class="fa fa-heart-o"></i>
+                            </button>
+                        </div>
+                        <div class="p-5">
+                            <div class="flex justify-between items-start mb-3">
+                                <h3 class="text-xl font-bold">春风450SR 2024款标准版</h3>
+                                <div class="text-right">
+                                    <p class="text-primary font-bold text-xl">¥280<span class="text-sm font-normal text-gray-500">/天</span></p>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-3 gap-2 mb-5 text-sm">
+                                <div class="flex flex-col items-center p-2 bg-gray-50 rounded-lg">
+                                    <i class="fa fa-tachometer text-gray-500 mb-1"></i>
+                                    <span>449.5cc</span>
+                                </div>
+                                <div class="flex flex-col items-center p-2 bg-gray-50 rounded-lg">
+                                    <i class="fa fa-gear text-gray-500 mb-1"></i>
+                                    <span>6档</span>
+                                </div>
+                                <div class="flex flex-col items-center p-2 bg-gray-50 rounded-lg">
+                                    <i class="fa fa-beer text-gray-500 mb-1"></i>
+                                    <span>汽油</span>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-3">
+                                <a href="#vehicle-detail" class="flex-1 text-center btn-primary">查看详情</a>
+                                <button class="w-12 h-12 border border-gray-200 rounded-lg flex items-center justify-center hover:bg-gray-50 transition-colors">
+                                    <i class="fa fa-calendar"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 车辆卡片 2 -->
+                    <div class="bg-white rounded-xl overflow-hidden shadow-sm card-hover">
+                        <div class="relative">
+                            <img src="https://github.com/zs1910115725-pixel/MOTO-GO-Pictures/raw/main/BMWmoto%201000RR%202023.jpg" alt="宝马S1000RR 2023款" class="w-full h-56 object-cover">
+                            <div class="absolute top-4 left-4 badge bg-highlight text-white">新品</div>
+                            <button class="collect-btn absolute top-4 right-4 w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center text-gray-600 hover:text-primary transition-colors">
+                                <i class="fa fa-heart-o"></i>
+                            </button>
+                        </div>
+                        <div class="p-5">
+                            <div class="flex justify-between items-start mb-3">
+                                <h3 class="text-xl font-bold">宝马S1000RR 2023款</h3>
+
+                                <div class="text-right">
+                                    <p class="text-primary font-bold text-xl">¥800<span class="text-sm font-normal text-gray-500">/天</span></p>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-3 gap-2 mb-5 text-sm">
+                                <div class="flex flex-col items-center p-2 bg-gray-50 rounded-lg">
+                                    <i class="fa fa-tachometer text-gray-500 mb-1"></i>
+                                    <span>1001cc</span>
+                                </div>
+                                <div class="flex flex-col items-center p-2 bg-gray-50 rounded-lg">
+                                    <i class="fa fa-gear text-gray-500 mb-1"></i>
+                                    <span>6档</span>
+                                </div>
+                                <div class="flex flex-col items-center p-2 bg-gray-50 rounded-lg">
+                                    <i class="fa fa-beer text-gray-500 mb-1"></i>
+                                    <span>汽油</span>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-3">
+                                <a href="#vehicle-detail" class="flex-1 text-center btn-primary">查看详情</a>
+                                <button class="w-12 h-12 border border-gray-200 rounded-lg flex items-center justify-center hover:bg-gray-50 transition-colors">
+                                    <i class="fa fa-calendar"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 车辆卡片 3 -->
+                    <div class="bg-white rounded-xl overflow-hidden shadow-sm card-hover">
+                        <div class="relative">
+                            <img src="https://github.com/zs1910115725-pixel/MOTO-GO-Pictures/raw/main/ZONTESmoto%20703RR%202024.jpg" alt="升仕703RR 2024款" class="w-full h-56 object-cover">
+                            <div class="absolute top-4 left-4 badge bg-highlight text-white">新品</div>
+                            <button class="collect-btn absolute top-4 right-4 w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center text-gray-600 hover:text-primary transition-colors">
+                                <i class="fa fa-heart-o"></i>
+                            </button>
+                        </div>
+                        <div class="p-5">
+                            <div class="flex justify-between items-start mb-3">
+                                <h3 class="text-xl font-bold">升仕703RR 2024款</h3>
+                                <div class="text-right">
+                                    <p class="text-primary font-bold text-xl">¥500<span class="text-sm font-normal text-gray-500">/天</span></p>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-3 gap-2 mb-5 text-sm">
+                                <div class="flex flex-col items-center p-2 bg-gray-50 rounded-lg">
+                                    <i class="fa fa-tachometer text-gray-500 mb-1"></i>
+                                    <span>699cc</span>
+                                </div>
+                                <div class="flex flex-col items-center p-2 bg-gray-50 rounded-lg">
+                                    <i class="fa fa-gear text-gray-500 mb-1"></i>
+                                    <span>自动</span>
+                                </div>
+                                <div class="flex flex-col items-center p-2 bg-gray-50 rounded-lg">
+                                    <i class="fa fa-beer text-gray-500 mb-1"></i>
+                                    <span>汽油</span>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-3">
+                                <a href="#vehicle-detail" class="flex-1 text-center btn-primary">查看详情</a>
+                                <button class="w-12 h-12 border border-gray-200 rounded-lg flex items-center justify-center hover:bg-gray-50 transition-colors">
+                                    <i class="fa fa-calendar"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- 查看更多按钮 -->
+                <div class="text-center mt-12">
+                    <button class="btn-secondary">
+                        查看更多车型 <i class="fa fa-angle-right"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 预订流程 -->
+        <section class="section-padding bg-white">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-16">
+                    <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-secondary mb-4">简单四步，轻松租车</h2>
+                    <p class="text-gray-600 max-w-2xl mx-auto">我们简化了租车流程，让您可以快速预订心仪的摩托车</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-8 relative">
+                    <!-- 连接线 - 仅在中等屏幕以上显示 -->
+                    <div class="hidden md:block absolute top-1/4 left-0 right-0 h-1 bg-gray-200 -z-10"></div>
+
+                    <div class="text-center">
+                        <div class="w-16 h-16 rounded-full bg-primary text-white flex items-center justify-center text-2xl font-bold mx-auto mb-4">1</div>
+                        <h3 class="text-xl font-bold mb-2">选择车型</h3>
+                        <p class="text-gray-600">浏览我们的车型库，选择适合您的摩托车</p>
+                    </div>
+
+                    <div class="text-center">
+                        <div class="w-16 h-16 rounded-full bg-primary text-white flex items-center justify-center text-2xl font-bold mx-auto mb-4">2</div>
+                        <h3 class="text-xl font-bold mb-2">确认日期</h3>
+                        <p class="text-gray-600">选择取车和还车的时间与地点</p>
+                    </div>
+
+                    <div class="text-center">
+                        <div class="w-16 h-16 rounded-full bg-primary text-white flex items-center justify-center text-2xl font-bold mx-auto mb-4">3</div>
+                        <h3 class="text-xl font-bold mb-2">提交订单</h3>
+                        <p class="text-gray-600">填写必要信息并完成支付预订</p>
+                    </div>
+
+                    <div class="text-center">
+                        <div class="w-16 h-16 rounded-full bg-primary text-white flex items-center justify-center text-2xl font-bold mx-auto mb-4">4</div>
+                        <h3 class="text-xl font-bold mb-2">开始骑行</h3>
+                        <p class="text-gray-600">按时取车，检查车辆，开始您的旅程</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 取车地点 -->
+        <section id="locations" class="section-padding bg-gray-50">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-12">
+                    <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-secondary mb-4">便捷取车点</h2>
+                    <p class="text-gray-600 max-w-2xl mx-auto">我们在城市各处设有取车点，让您可以就近取还车</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- 地点卡片 1 -->
+                    <div class="bg-white rounded-xl overflow-hidden shadow-sm card-hover">
+                        <img src="https://github.com/zs1910115725-pixel/MOTO-GO-Pictures/raw/main/YCIT.jpg" alt="工学院店" class="w-full h-48 object-cover">
+                        <div class="p-5">
+                            <h3 class="text-xl font-bold mb-2">工学院店</h3>
+                            <p class="text-gray-600 mb-4 flex items-start gap-2">
+                                <i class="fa fa-map-marker text-primary mt-1"></i>
+                                <span>江苏省盐城市亭湖区希望大道1号</span>
+                            </p>
+                            <div class="flex justify-between text-sm">
+                                <div class="flex items-center gap-1 text-gray-600">
+                                    <i class="fa fa-clock-o text-primary"></i>
+                                    <span>09:00 - 18:00</span>
+                                </div>
+                                <a href="#location-detail" class="text-primary font-medium hover:underline">查看详情</a>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 地点卡片 2 -->
+                    <div class="bg-white rounded-xl overflow-hidden shadow-sm card-hover">
+                        <img src="https://github.com/zs1910115725-pixel/MOTO-GO-Pictures/raw/main/YCIT.jpg" alt="工学院店" class="w-full h-48 object-cover">
+                        <div class="p-5">
+                            <h3 class="text-xl font-bold mb-2">工学院店</h3>
+                            <p class="text-gray-600 mb-4 flex items-start gap-2">
+                                <i class="fa fa-map-marker text-primary mt-1"></i>
+                                <span>江苏省盐城市亭湖区希望大道1号</span>
+                            </p>
+                            <div class="flex justify-between text-sm">
+                                <div class="flex items-center gap-1 text-gray-600">
+                                    <i class="fa fa-clock-o text-primary"></i>
+                                    <span>09:00 - 18:00</span>
+                                </div>
+                                <a href="#location-detail" class="text-primary font-medium hover:underline">查看详情</a>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 地点卡片 3 -->
+                    <div class="bg-white rounded-xl overflow-hidden shadow-sm card-hover">
+                        <img src="https://github.com/zs1910115725-pixel/MOTO-GO-Pictures/raw/main/YCIT.jpg" alt="工学院店" class="w-full h-48 object-cover">
+                        <div class="p-5">
+                            <h3 class="text-xl font-bold mb-2">工学院店</h3>
+                            <p class="text-gray-600 mb-4 flex items-start gap-2">
+                                <i class="fa fa-map-marker text-primary mt-1"></i>
+                                <span>江苏省盐城市亭湖区希望大道1号</span>
+                            </p>
+                            <div class="flex justify-between text-sm">
+                                <div class="flex items-center gap-1 text-gray-600">
+                                    <i class="fa fa-clock-o text-primary"></i>
+                                    <span>09:00 - 18:00</span>
+                                </div>
+                                <a href="#location-detail" class="text-primary font-medium hover:underline">查看详情</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 用户评价 -->
+        <section class="section-padding bg-white">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-12">
+                    <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-secondary mb-4">用户真实评价</h2>
+                    <p class="text-gray-600 max-w-2xl mx-auto">听听我们的用户怎么说</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- 评价卡片 1 -->
+                    <div class="bg-gray-50 rounded-xl p-6 card-hover">
+                        <div class="flex items-center gap-1 text-yellow-400 mb-4">
+                            <i class="fa fa-star"></i>
+                            <i class="fa fa-star"></i>
+                            <i class="fa fa-star"></i>
+                            <i class="fa fa-star"></i>
+                            <i class="fa fa-star"></i>
+                        </div>
+                        <p class="text-gray-700 mb-6">"车辆状态非常好，预订流程简单方便，取车还车都很快捷。工作人员服务态度很好，给了很多有用的骑行建议。"</p>
+                        <div class="flex items-center gap-3">
+                            <img src="https://picsum.photos/id/1012/100" alt="用户头像" class="w-12 h-12 rounded-full object-cover">
+                            <div>
+                                <h4 class="font-medium">李先生</h4>
+                                <p class="text-sm text-gray-500">租用了 宝马S1000RR 2023款</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 评价卡片 2 -->
+                    <div class="bg-gray-50 rounded-xl p-6 card-hover">
+                        <div class="flex items-center gap-1 text-yellow-400 mb-4">
+                            <i class="fa fa-star"></i>
+                            <i class="fa fa-star"></i>
+                            <i class="fa fa-star"></i>
+                            <i class="fa fa-star"></i>
+                            <i class="fa fa-star-half-o"></i>
+                        </div>
+                        <p class="text-gray-700 mb-6">"春风450SR 2024款标准版非常适合城市通勤，造型时尚，骑起来很舒适。价格合理，保险齐全，让人很放心。唯一不足是周末车辆比较紧张，需要提前预订。"</p>
+                        <div class="flex items-center gap-3">
+                            <img src="https://picsum.photos/id/1027/100" alt="用户头像" class="w-12 h-12 rounded-full object-cover">
+                            <div>
+                                <h4 class="font-medium">王女士</h4>
+                                <p class="text-sm text-gray-500">租用了 春风450SR 2024款标准版</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 评价卡片 3 -->
+                    <div class="bg-gray-50 rounded-xl p-6 card-hover">
+                        <div class="flex items-center gap-1 text-yellow-400 mb-4">
+                            <i class="fa fa-star"></i>
+                            <i class="fa fa-star"></i>
+                            <i class="fa fa-star"></i>
+                            <i class="fa fa-star"></i>
+                            <i class="fa fa-star"></i>
+                        </div>
+                        <p class="text-gray-700 mb-6">"服务非常专业，取车时工作人员详细讲解了车辆操作和注意事项。升仕703RR 2024款性能出色，非常适合长途骑行。还车时也没有任何刁难，强烈推荐！"</p>
+                        <div class="flex items-center gap-3">
+                            <img src="https://picsum.photos/id/1025/100" alt="用户头像" class="w-12 h-12 rounded-full object-cover">
+                            <div>
+                                <h4 class="font-medium">张先生</h4>
+                                <p class="text-sm text-gray-500">租用了 升仕703RR 2024款</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 常见问题 -->
+        <section id="faq" class="section-padding bg-gray-50">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-12">
+                    <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-secondary mb-4">常见问题</h2>
+                    <p class="text-gray-600 max-w-2xl mx-auto">关于摩托车租赁的常见问题解答</p>
+                </div>
+
+                <div class="max-w-3xl mx-auto">
+                    <!-- FAQ 项目 -->
+                    <div class="mb-4">
+                        <button class="faq-toggle w-full flex justify-between items-center bg-white p-5 rounded-lg shadow-sm hover:shadow transition-shadow">
+                            <span class="font-medium text-left">租赁摩托车需要什么证件？</span>
+                            <i class="fa fa-chevron-down text-gray-400 transition-transform duration-300"></i>
+                        </button>
+                        <div class="faq-content hidden bg-white mt-1 p-5 rounded-lg shadow-sm">
+                            <p class="text-gray-600">租赁摩托车需要提供有效的身份证、驾驶证（准驾车型需包含摩托车，即D照或E照），以及信用卡（用于支付押金）。外籍人士需提供护照和国际驾照。</p>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <button class="faq-toggle w-full flex justify-between items-center bg-white p-5 rounded-lg shadow-sm hover:shadow transition-shadow">
+                            <span class="font-medium text-left">可以提前预订吗？最早可以提前多久？</span>
+                            <i class="fa fa-chevron-down text-gray-400 transition-transform duration-300"></i>
+                        </button>
+                        <div class="faq-content hidden bg-white mt-1 p-5 rounded-lg shadow-sm">
+                            <p class="text-gray-600">可以提前预订，建议至少提前1-2天预订，特别是在旅游旺季。系统支持最多提前30天预订车辆。预订时需支付一定比例的预付款，取消预订将根据取消时间按规定退还预付款。</p>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <button class="faq-toggle w-full flex justify-between items-center bg-white p-5 rounded-lg shadow-sm hover:shadow transition-shadow">
+                            <span class="font-medium text-left">租赁费用包含哪些项目？</span>
+                            <i class="fa fa-chevron-down text-gray-400 transition-transform duration-300"></i>
+                        </button>
+                        <div class="faq-content hidden bg-white mt-1 p-5 rounded-lg shadow-sm">
+                            <p class="text-gray-600">租赁费用包含车辆使用费、基本保险（交强险、第三者责任险）、车辆维护费。不包含燃油费、过路费、停车费等额外费用。您可以选择购买额外的车辆损失险和盗抢险。</p>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <button class="faq-toggle w-full flex justify-between items-center bg-white p-5 rounded-lg shadow-sm hover:shadow transition-shadow">
+                            <span class="font-medium text-left">如果车辆在租赁期间出现故障或事故怎么办？</span>
+                            <i class="fa fa-chevron-down text-gray-400 transition-transform duration-300"></i>
+                        </button>
+                        <div class="faq-content hidden bg-white mt-1 p-5 rounded-lg shadow-sm">
+                            <p class="text-gray-600">如果遇到故障或事故，请立即拨打我们的24小时客服热线。对于机械故障，我们将提供免费维修或更换车辆。对于事故，需先报警并保留现场，我们的工作人员会指导您进行后续处理。根据保险条款，可能需要承担一定的免赔额。</p>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <button class="faq-toggle w-full flex justify-between items-center bg-white p-5 rounded-lg shadow-sm hover:shadow transition-shadow">
+                            <span class="font-medium text-left">可以异地还车吗？</span>
+                            <i class="fa fa-chevron-down text-gray-400 transition-transform duration-300"></i>
+                        </button>
+                        <div class="faq-content hidden bg-white mt-1 p-5 rounded-lg shadow-sm">
+                            <p class="text-gray-600">支持异地还车服务，但需要在预订时说明，并可能收取一定的异地还车费。具体费用根据还车地点而定，您可以在预订过程中查看详细费用说明。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 行动召唤 -->
+        <section class="py-20 bg-gradient-to-r from-secondary to-highlight text-white">
+            <div class="container mx-auto px-4 text-center">
+                <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold mb-6">准备好开始您的骑行之旅了吗？</h2>
+                <p class="text-xl opacity-90 mb-8 max-w-2xl mx-auto">加入我们，探索城市的每一个角落，体验风驰电掣的快感</p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="#vehicles" class="bg-white text-primary px-8 py-3 rounded-lg font-bold text-lg transition-all duration-200 hover:bg-gray-100">
+                        浏览车型
+                    </a>
+                    <a href="#register" class="bg-transparent border-2 border-white px-8 py-3 rounded-lg font-bold text-lg transition-all duration-200 hover:bg-white/10">
+                        立即注册
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-secondary text-white pt-16 pb-8">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+                <div>
+                    <div class="flex items-center gap-2 mb-6">
+                        <div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-white">
+                            <i class="fa fa-motorcycle text-xl"></i>
+                        </div>
+                        <span class="text-xl font-bold">摩托Go</span>
+                    </div>
+                    <p class="text-gray-300 mb-6">专业的摩托车租赁平台，让您的出行更加自由便捷。</p>
+                    <div class="flex gap-4">
+                        <a href="#" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-primary transition-colors">
+                            <i class="fa fa-qq"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-primary transition-colors">
+                            <i class="fa fa-weixin"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-primary transition-colors">
+                            <i class="fa fa-weibo"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-lg font-bold mb-6">快速链接</h3>
+                    <ul class="space-y-3">
+                        <li><a href="#home" class="text-gray-300 hover:text-white transition-colors">首页</a></li>
+                        <li><a href="#vehicles" class="text-gray-300 hover:text-white transition-colors">车辆列表</a></li>
+                        <li><a href="#locations" class="text-gray-300 hover:text-white transition-colors">取车点</a></li>
+                        <li><a href="#about" class="text-gray-300 hover:text-white transition-colors">关于我们</a></li>
+                        <li><a href="#faq" class="text-gray-300 hover:text-white transition-colors">常见问题</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-lg font-bold mb-6">联系我们</h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-start gap-3">
+                            <i class="fa fa-map-marker text-primary mt-1"></i>
+                            <span class="text-gray-300">江苏省盐城市亭湖区希望大道1号摩托Go总部</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fa fa-phone text-primary"></i>
+                            <span class="text-gray-300">xxx-xxx-xxxx</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fa fa-envelope text-primary"></i>
+                            <span class="text-gray-300">xxxx@motogo.com</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fa fa-clock-o text-primary"></i>
+                            <span class="text-gray-300">周一至周五 09:00-17:00</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-lg font-bold mb-6">订阅通知</h3>
+                    <p class="text-gray-300 mb-4">订阅我们的电子邮件，获取最新优惠和活动信息</p>
+                    <form class="flex">
+                        <input type="email" placeholder="您的邮箱地址" class="flex-1 px-4 py-2 rounded-l-lg focus:outline-none text-gray-800">
+                        <button type="submit" class="bg-primary px-4 py-2 rounded-r-lg hover:bg-primary/90 transition-colors">
+                            <i class="fa fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="pt-8 border-t border-white/10 text-center text-gray-400 text-sm">
+                <p>&copy; 2025 摩托Go Motorcycle Rental. 保留所有权利。</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="./motoGO.js"></script>
+</body>
+</html>
